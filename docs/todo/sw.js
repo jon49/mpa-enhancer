@@ -67,7 +67,7 @@ function todoView({ completed, title, id, editing }) {
   let liClass = `class="${completedClass} ${editingClass}"`;
   return e2`
     <li $${liClass}>
-        <form method="post" action="/todos?handler=toggle-complete&id=$${"" + id}">
+        <form method="post" action="?handler=toggle-complete&id=$${"" + id}">
             <input
                 id="toggle_${"" + id}"
                 class="toggle"
@@ -80,7 +80,7 @@ function todoView({ completed, title, id, editing }) {
                     id="edit_${"" + id}"
                     class="view"
                     >${title}</label>
-                <button formaction="/todos?handler=edit&id=${"" + id}">Edit</button>` : ""}
+                <button formaction="?handler=edit&id=${"" + id}">Edit</button>` : ""}
             $${!editing ? "" : e2`
                 <input
                     id="edit_${"" + id}"
@@ -90,9 +90,9 @@ function todoView({ completed, title, id, editing }) {
                     autocomplete="off"
                     autofocus
                     >
-                <button hidden formaction="/todos?handler=update&id=${"" + id}"></button>
-                <button formaction="/todos?handler=cancel-edit&id=${"" + id}">Cancel</button>`}
-            <button class="destroy" formaction="/todos?handler=delete&id=${"" + id}"></button>
+                <button hidden formaction="?handler=update&id=${"" + id}"></button>
+                <button formaction="?handler=cancel-edit&id=${"" + id}">Cancel</button>`}
+            <button class="destroy" formaction="?handler=delete&id=${"" + id}"></button>
         </form>
     </li>`;
 }
@@ -114,13 +114,13 @@ function layout(todos, activeCount, count) {
     <section class="todoapp">
         <header class="header">
             <h1>todos</h1>
-            <form method="post" action="/todos?handler=create">
+            <form method="post" action="?handler=create">
             <input
                 class="new-todo"
                 placeholder="What needs to be done?"
                 autocomplete="off"
                 name="title"
-                `, '\n                >\n            </form>\n        </header>\n        <!-- This section should be hidden by default and shown when there are todos -->\n        <section id="todo-section" class="main ', '">\n            <form\n                method="post"\n                action="/todos?handler=toggle-all"\n                onchange="this.submit()"\n                >\n                <input id="toggle-all" class="toggle-all" type="checkbox">\n                <label for="toggle-all">Mark all as complete</label>\n            </form>\n            <ul id="todo-list" class="todo-list">$', '</ul>\n        </section>\n        <!-- This footer should be hidden by default and shown when there are todos -->\n        <footer id="footer" class="footer ', '}">\n            <span class="todo-count">\n                <strong>', "</strong> item", ' left\n            </span>\n        <ul class="filters">\n            <li>\n                <a id=link-all class="selected" href="?filter=all">All</a>\n            </li>\n            <li><a id=link-active href="?filter=active">Active</a></li>\n            <li><a id=link-completed href="?filter=completed">Completed</a></li>\n        </ul>\n        <!--Hidden if no completed items are left \u2193 -->\n        $', `
+                `, '\n                >\n            </form>\n        </header>\n        <!-- This section should be hidden by default and shown when there are todos -->\n        <section id="todo-section" class="main ', '">\n            <form\n                method="post"\n                action="?handler=toggle-all"\n                onchange="this.submit()"\n                >\n                <input id="toggle-all" class="toggle-all" type="checkbox">\n                <label for="toggle-all">Mark all as complete</label>\n            </form>\n            <ul id="todo-list" class="todo-list">$', '</ul>\n        </section>\n        <!-- This footer should be hidden by default and shown when there are todos -->\n        <footer id="footer" class="footer ', '}">\n            <span class="todo-count">\n                <strong>', "</strong> item", ' left\n            </span>\n        <ul class="filters">\n            <li>\n                <a id=link-all class="selected" href="?filter=all">All</a>\n            </li>\n            <li><a id=link-active href="?filter=active">Active</a></li>\n            <li><a id=link-completed href="?filter=completed">Completed</a></li>\n        </ul>\n        <!--Hidden if no completed items are left \u2193 -->\n        $', `
         </footer>
     </section>
     <footer class="info">
@@ -134,7 +134,7 @@ function layout(todos, activeCount, count) {
     <script src="./js/app.js"><\/script>
     <script src="./js/lib/mpa.js"><\/script>
 </body>
-</html>`])), todos.length === 0 ? "autofocus" : "", todos.length === 0 ? "hidden" : "", todos.map(todoView).join(""), !count ? "hidden" : "", "" + activeCount, activeCount === 1 ? "" : "s", count - activeCount === 0 ? "" : e2`<form method="post" action="/todos?handler=clear-completed" target="#todo-list">
+</html>`])), todos.length === 0 ? "autofocus" : "", todos.length === 0 ? "hidden" : "", todos.map(todoView).join(""), !count ? "hidden" : "", "" + activeCount, activeCount === 1 ? "" : "s", count - activeCount === 0 ? "" : e2`<form method="post" action="?handler=clear-completed" target="#todo-list">
                 <button id="clear-completed" class="clear-completed">Clear completed</button>
             </form>`);
 }
