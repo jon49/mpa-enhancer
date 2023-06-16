@@ -1,0 +1,10 @@
+.input-toggle:focus {
+    display: none;
+}
+.input-toggle+input {
+    display: none;
+}
+.input-toggle+input:focus {
+    display: block;
+}
+

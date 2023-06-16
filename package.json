@@ -1,0 +1,28 @@
+{
+  "name": "mpa-enhancer",
+  "version": "1.0.0",
+  "description": "Minimalist JavaScript to make your MPA work that much better",
+  "main": "src/mpa.js",
+  "scripts": {
+    "start": "npm run clean && npm run make-dirs && npm run static && esbuild --format=esm --watch --outdir=docs/todo --bundle --servedir=docs/todo ./src-todo/sw.ts",
+    "static": "cd ./src-todo/ && cp --parents `find . -name '*.js' -o -name '*.html' -o -name '*.css'` ../docs/todo && cd .. && npm run mpa  && npm run todo && npm run app",
+    "mpa": "cp ./src/mpa.js ./docs/todo/js/lib/mpa.js",
+    "todo": "cp ./node_modules/todomvc-app-css/index.css ./docs/todo/css/index.css && cp ./node_modules/todomvc-common/base.css ./docs/todo/css/base.css",
+    "make-dirs": "mkdir -p docs/todo/js docs/todo/css docs/todo/js/lib",
+    "app": "esbuild ./src-todo/js/app.ts --bundle --format=iife --outdir=docs/todo/js",
+    "clean": "rm -rf docs/todo",
+    "build": "npm run clean && npm run make-dirs && npm run static && esbuild --format=esm --outdir=docs/todo --bundle ./src-todo/sw.ts",
+    "build-mpa": "npx esbuild src/mpa.js --minify --outfile=src/mpa.min.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.18.3"
+  },
+  "dependencies": {
+    "html-template-tag": "^4.0.1",
+    "idb-keyval": "^6.2.1",
+    "todomvc-app-css": "^2.4.2",
+    "todomvc-common": "^1.0.5"
+  }
+}
