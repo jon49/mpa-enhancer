@@ -14,7 +14,7 @@ function todoView({ completed, title, id, editing }: Todo) {
     // @ts-ignore
     return html`
     <li $${liClass}>
-        <form method="post" action="/todos?handler=toggle-complete&id=$${"" + id}">
+        <form method="post" action="todos?handler=toggle-complete&id=$${"" + id}">
             <input
                 id="toggle_${"" + id}"
                 class="toggle"
@@ -28,7 +28,7 @@ function todoView({ completed, title, id, editing }: Todo) {
                     id="edit_${"" + id}"
                     class="view"
                     >${title}</label>
-                <button formaction="/todos?handler=edit&id=${"" + id}">Edit</button>`
+                <button formaction="todos?handler=edit&id=${"" + id}">Edit</button>`
             : ""}
             $${!editing
             ? ""
@@ -41,10 +41,10 @@ function todoView({ completed, title, id, editing }: Todo) {
                     autocomplete="off"
                     autofocus
                     >
-                <button hidden formaction="/todos?handler=update&id=${"" + id}"></button>
-                <button formaction="/todos?handler=cancel-edit&id=${"" + id}">Cancel</button>`
+                <button hidden formaction="todos?handler=update&id=${"" + id}"></button>
+                <button formaction="todos?handler=cancel-edit&id=${"" + id}">Cancel</button>`
         }
-            <button class="destroy" formaction="/todos?handler=delete&id=${"" + id}"></button>
+            <button class="destroy" formaction="todos?handler=delete&id=${"" + id}"></button>
         </form>
     </li>`
 }
@@ -67,7 +67,7 @@ export function layout(todos: Todo[], activeCount: number, count: number) {
     <section class="todoapp">
         <header class="header">
             <h1>todos</h1>
-            <form method="post" action="/todos?handler=create">
+            <form method="post" action="todos?handler=create">
             <input
                 class="new-todo"
                 placeholder="What needs to be done?"
@@ -81,7 +81,7 @@ export function layout(todos: Todo[], activeCount: number, count: number) {
         <section id="todo-section" class="main ${todos.length === 0 ? 'hidden' : ''}">
             <form
                 method="post"
-                action="/todos?handler=toggle-all"
+                action="todos?handler=toggle-all"
                 onchange="this.submit()"
                 >
                 <input id="toggle-all" class="toggle-all" type="checkbox">
@@ -104,7 +104,7 @@ export function layout(todos: Todo[], activeCount: number, count: number) {
         <!--Hidden if no completed items are left ↓ -->
         $${ count - activeCount === 0
             ? ''
-        : html`<form method="post" action="/todos?handler=clear-completed" target="#todo-list">
+        : html`<form method="post" action="todos?handler=clear-completed" target="#todo-list">
                 <button id="clear-completed" class="clear-completed">Clear completed</button>
             </form>`
         }
