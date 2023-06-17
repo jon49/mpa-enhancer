@@ -13,9 +13,12 @@ interface GetHandlerOptions {
 }
 type Handler = (o: RequestOptions) => Promise<void>
 type GetHandler = (o: GetHandlerOptions) => Promise<string>
+interface Settings {
+    enableJS: boolean
+}
 
 export const getAll : GetHandler = async ({ request }) => {
-    const todos = await getTodoIds()
+    const [ todos, { enableJS } ] = await Promise.all([getTodoIds(), getSettings()])
     if (todos.length === 0) return layout([], 0, 0)
     let todoData = await getMany(todos)
     let activeCount = todoData.filter(x => !x.completed).length
@@ -24,7 +27,7 @@ export const getAll : GetHandler = async ({ request }) => {
         todoData = todoData.filter(x => x.completed)
     if (request.url.endsWith("active"))
         todoData = todoData.filter(x => !x.completed)
-    return layout(todoData, activeCount, count)
+    return layout(todoData, activeCount, count, enableJS)
 }
 
 export const createTodo : Handler = async({ data }) => {
@@ -40,6 +43,7 @@ export const createTodo : Handler = async({ data }) => {
 export const updateTodo : Handler = async (opts) => {
     let { url, data } = opts
     await cancelEdit(opts)
+    if (data.title === "") return
     const oldData = await getDataFromQueryId(url)
     if (!oldData) return
     await set(oldData.id, { ...oldData, ...data })
@@ -84,6 +88,11 @@ async function getDataFromQueryId(url: URL) {
     return oldData
 }
 
+async function getSettings() {
+    const settings : Settings = (await get("settings")) ?? { enableJS: true }
+    return settings
+}
+
 async function getTodoIds() {
     const todos : number[] = (await get("todos")) ?? []
     return todos
@@ -109,5 +118,11 @@ export const clearCompleted : Handler = async () => {
     const completed = todoData.filter(x => x.completed).map(x => x.id)
     await Promise.all(completed.map(x => del(x)))
     await set("todos", todos.filter(x => !completed.includes(x)))
+}
+
+export const toggleJS : Handler = async () => {
+    const settings = await getSettings()
+    settings.enableJS = !settings.enableJS
+    await set("settings", settings)
 }
 

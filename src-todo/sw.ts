@@ -8,6 +8,7 @@ import {
     toggleAll,
     toggleComplete,
     updateTodo,
+    toggleJS,
 } from "./server/actions.js"
 
 const version = "0.0.1"
@@ -94,6 +95,9 @@ async function handle(handler: string, request: Request, url: URL) {
             break
         case "edit":
             await edit(opt)
+            break
+        case "toggle-js":
+            await toggleJS(opt)
             break
         default:
             return new Response("Unknown handler", { status: 400 })

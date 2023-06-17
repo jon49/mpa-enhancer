@@ -68,36 +68,45 @@ function todoView({ completed, title, id, editing }) {
   return e2`
     <li $${liClass}>
         <form method="post" action="?handler=toggle-complete&id=$${"" + id}">
-            <input
+            <button
                 id="toggle_${"" + id}"
-                class="toggle"
+                class="toggle button-toggle"
                 type="checkbox"
-                ${completed ? "checked" : ""}
-                onchange="this.form.submit()"
-                >
+            >$${completed ? "&#10004;" : ""}</button>
+        </form>
+        <form method="post">
             $${!editing ? e2`
                 <label
                     id="edit_${"" + id}"
                     class="view"
-                    >${title}</label>
-                <button formaction="?handler=edit&id=${"" + id}">Edit</button>` : ""}
+                    >${title}
+                    <button
+                        id="edit_${"" + id}"
+                        class="edit-text"
+                        title="Edit"
+                        aria-label="Edit"
+                        formaction="?handler=edit&id=${"" + id}">
+                        &#9998;</button>
+                    </label>` : ""}
             $${!editing ? "" : e2`
+            <div>
                 <input
                     id="edit_${"" + id}"
                     class="edit"
                     value="${title}"
                     name="title"
                     autocomplete="off"
-                    autofocus
                     >
                 <button hidden formaction="?handler=update&id=${"" + id}"></button>
-                <button formaction="?handler=cancel-edit&id=${"" + id}">Cancel</button>`}
+                <button class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
+            </div>
+            `}
             <button class="destroy" formaction="?handler=delete&id=${"" + id}"></button>
         </form>
     </li>`;
 }
 var _a;
-function layout(todos, activeCount, count) {
+function layout(todos, activeCount, count, enableJS) {
   return e2(_a || (_a = __template([`
 <!doctype html>
 <html lang="en">
@@ -120,28 +129,22 @@ function layout(todos, activeCount, count) {
                 placeholder="What needs to be done?"
                 autocomplete="off"
                 name="title"
-                `, '\n                >\n            </form>\n        </header>\n        <!-- This section should be hidden by default and shown when there are todos -->\n        <section id="todo-section" class="main ', '">\n            <form\n                method="post"\n                action="?handler=toggle-all"\n                onchange="this.submit()"\n                >\n                <input id="toggle-all" class="toggle-all" type="checkbox">\n                <label for="toggle-all">Mark all as complete</label>\n            </form>\n            <ul id="todo-list" class="todo-list">$', '</ul>\n        </section>\n        <!-- This footer should be hidden by default and shown when there are todos -->\n        <footer id="footer" class="footer ', '}">\n            <span class="todo-count">\n                <strong>', "</strong> item", ' left\n            </span>\n        <ul class="filters">\n            <li>\n                <a id=link-all class="selected" href="?filter=all">All</a>\n            </li>\n            <li><a id=link-active href="?filter=active">Active</a></li>\n            <li><a id=link-completed href="?filter=completed">Completed</a></li>\n        </ul>\n        <!--Hidden if no completed items are left \u2193 -->\n        $', `
-        </footer>
-    </section>
-    <footer class="info">
-        <p>Double - click to edit a todo</p>
-        <p><a href="https://github.com/jon49/htmf/tree/master/src-todo">Source Code</a></p >
+                `, '\n                >\n            </form>\n        </header>\n        <!-- This section should be hidden by default and shown when there are todos -->\n        <section id="todo-section" class="main ', '">\n            <form method="post" action="?handler=toggle-all">\n                <button id=toggle-all class="toggle-all-2">Mark all as complete</button>\n            </form>\n            <ul id="todo-list" class="todo-list">$', '</ul>\n        </section>\n        <!-- This footer should be hidden by default and shown when there are todos -->\n        <footer id="footer" class="footer ', '}">\n            <span class="todo-count">\n                <strong>', "</strong> item", ' left\n            </span>\n        <ul class="filters">\n            <li>\n                <a id=link-all class="selected" href="?filter=all">All</a>\n            </li>\n            <li><a id=link-active href="?filter=active">Active</a></li>\n            <li><a id=link-completed href="?filter=completed">Completed</a></li>\n        </ul>\n        <!--Hidden if no completed items are left \u2193 -->\n        $', '\n        </footer>\n    </section>\n    <footer class="info">\n        <p><form method=post action="?handler=toggle-js"><button>', `</button></form></p>
+        <p><a href="https://github.com/jon49/mpa-enhancer/tree/master/src-todo">Source Code</a></p >
         <p>Created by <a href="https://jnyman.com">Jon Nyman</a></p>
         <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
     </footer>
     <!--Scripts here.Don't remove \u2193 -->
     <script src="./js/sw-loader.js"><\/script>
     <script src="./js/app.js"><\/script>
-    <script src="./js/lib/mpa.js"><\/script>
-</body>
-</html>`])), todos.length === 0 ? "autofocus" : "", todos.length === 0 ? "hidden" : "", todos.map(todoView).join(""), !count ? "hidden" : "", "" + activeCount, activeCount === 1 ? "" : "s", count - activeCount === 0 ? "" : e2`<form method="post" action="?handler=clear-completed" target="#todo-list">
+    $`, "\n</body>\n</html>"])), todos.length === 0 ? "autofocus" : "", todos.length === 0 ? "hidden" : "", todos.map(todoView).join(""), !count ? "hidden" : "", "" + activeCount, activeCount === 1 ? "" : "s", count - activeCount === 0 ? "" : e2`<form method="post" action="?handler=clear-completed">
                 <button id="clear-completed" class="clear-completed">Clear completed</button>
-            </form>`);
+            </form>`, enableJS ? "Disable JS" : "Enable JS", enableJS ? `<script src="./js/lib/mpa.js"><\/script>` : "");
 }
 
 // src-todo/server/actions.ts
 var getAll = async ({ request }) => {
-  const todos = await getTodoIds();
+  const [todos, { enableJS }] = await Promise.all([getTodoIds(), getSettings()]);
   if (todos.length === 0)
     return layout([], 0, 0);
   let todoData = await getMany(todos);
@@ -151,7 +154,7 @@ var getAll = async ({ request }) => {
     todoData = todoData.filter((x) => x.completed);
   if (request.url.endsWith("active"))
     todoData = todoData.filter((x) => !x.completed);
-  return layout(todoData, activeCount, count);
+  return layout(todoData, activeCount, count, enableJS);
 };
 var createTodo = async ({ data }) => {
   if (data.title === "")
@@ -166,6 +169,8 @@ var createTodo = async ({ data }) => {
 var updateTodo = async (opts) => {
   let { url, data } = opts;
   await cancelEdit(opts);
+  if (data.title === "")
+    return;
   const oldData = await getDataFromQueryId(url);
   if (!oldData)
     return;
@@ -210,6 +215,10 @@ async function getDataFromQueryId(url) {
   const oldData = await get(id);
   return oldData;
 }
+async function getSettings() {
+  const settings = await get("settings") ?? { enableJS: true };
+  return settings;
+}
 async function getTodoIds() {
   const todos = await get("todos") ?? [];
   return todos;
@@ -232,6 +241,11 @@ var clearCompleted = async () => {
   const completed = todoData.filter((x) => x.completed).map((x) => x.id);
   await Promise.all(completed.map((x) => del(x)));
   await set("todos", todos.filter((x) => !completed.includes(x)));
+};
+var toggleJS = async () => {
+  const settings = await getSettings();
+  settings.enableJS = !settings.enableJS;
+  await set("settings", settings);
 };
 
 // src-todo/sw.ts
@@ -306,6 +320,9 @@ async function handle(handler, request, url) {
       break;
     case "edit":
       await edit(opt);
+      break;
+    case "toggle-js":
+      await toggleJS(opt);
       break;
     default:
       return new Response("Unknown handler", { status: 400 });
