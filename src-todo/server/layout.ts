@@ -7,7 +7,7 @@ export interface Todo {
     editing: boolean
 }
 
-function todoView({ completed, title, id, editing }: Todo) {
+function todoView({ completed, title, id, editing }: Todo, enableJS: boolean) {
     let completedClass = completed ? "completed" : ""
     let editingClass = editing ? "editing" : ""
     let liClass = `class="${completedClass} ${editingClass}"`
@@ -47,6 +47,7 @@ function todoView({ completed, title, id, editing }: Todo) {
                     value="${title}"
                     name="title"
                     autocomplete="off"
+                    ${enableJS ? "" : "autofocus"}
                     >
                 <button hidden formaction="?handler=update&id=${"" + id}"></button>
                 <button class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
@@ -91,7 +92,7 @@ export function layout(todos: Todo[], activeCount: number, count: number, enable
             <form method="post" action="?handler=toggle-all">
                 <button id=toggle-all class="toggle-all-2">Mark all as complete</button>
             </form>
-            <ul id="todo-list" class="todo-list">$${todos.map(todoView).join('')}</ul>
+            <ul id="todo-list" class="todo-list">$${todos.map(x => todoView(x, enableJS)).join('')}</ul>
         </section>
         <!-- This footer should be hidden by default and shown when there are todos -->
         <footer id="footer" class="footer ${!count ? 'hidden' : ''}}">

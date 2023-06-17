@@ -61,7 +61,7 @@ function e2(e3) {
 }
 
 // src-todo/server/layout.ts
-function todoView({ completed, title, id, editing }) {
+function todoView({ completed, title, id, editing }, enableJS) {
   let completedClass = completed ? "completed" : "";
   let editingClass = editing ? "editing" : "";
   let liClass = `class="${completedClass} ${editingClass}"`;
@@ -96,6 +96,7 @@ function todoView({ completed, title, id, editing }) {
                     value="${title}"
                     name="title"
                     autocomplete="off"
+                    ${enableJS ? "" : "autofocus"}
                     >
                 <button hidden formaction="?handler=update&id=${"" + id}"></button>
                 <button class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
@@ -137,7 +138,7 @@ function layout(todos, activeCount, count, enableJS) {
     <!--Scripts here.Don't remove \u2193 -->
     <script src="./js/sw-loader.js"><\/script>
     <script src="./js/app.js"><\/script>
-    $`, "\n</body>\n</html>"])), todos.length === 0 ? "autofocus" : "", todos.length === 0 ? "hidden" : "", todos.map(todoView).join(""), !count ? "hidden" : "", "" + activeCount, activeCount === 1 ? "" : "s", count - activeCount === 0 ? "" : e2`<form method="post" action="?handler=clear-completed">
+    $`, "\n</body>\n</html>"])), todos.length === 0 ? "autofocus" : "", todos.length === 0 ? "hidden" : "", todos.map((x) => todoView(x, enableJS)).join(""), !count ? "hidden" : "", "" + activeCount, activeCount === 1 ? "" : "s", count - activeCount === 0 ? "" : e2`<form method="post" action="?handler=clear-completed">
                 <button id="clear-completed" class="clear-completed">Clear completed</button>
             </form>`, enableJS ? "Disable JS" : "Enable JS", enableJS ? `<script src="./js/lib/mpa.js"><\/script>` : "");
 }
