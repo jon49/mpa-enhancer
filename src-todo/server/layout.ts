@@ -50,7 +50,7 @@ function todoView({ completed, title, id, editing }: Todo, enableJS: boolean) {
                     ${enableJS ? "" : "autofocus"}
                     >
                 <button hidden formaction="?handler=update&id=${"" + id}"></button>
-                <button class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
+                <button id="edit_${"" + id}" class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
             </div>
             `
         }

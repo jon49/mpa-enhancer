@@ -99,7 +99,7 @@ function todoView({ completed, title, id, editing }, enableJS) {
                     ${enableJS ? "" : "autofocus"}
                     >
                 <button hidden formaction="?handler=update&id=${"" + id}"></button>
-                <button class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
+                <button id="edit_${"" + id}" class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
             </div>
             `}
             <button class="destroy" formaction="?handler=delete&id=${"" + id}"></button>
@@ -147,7 +147,7 @@ function layout(todos, activeCount, count, enableJS) {
 var getAll = async ({ request }) => {
   const [todos, { enableJS }] = await Promise.all([getTodoIds(), getSettings()]);
   if (todos.length === 0)
-    return layout([], 0, 0);
+    return layout([], 0, 0, enableJS);
   let todoData = await getMany(todos);
   let activeCount = todoData.filter((x) => !x.completed).length;
   let count = todoData.length;

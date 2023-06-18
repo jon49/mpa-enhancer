@@ -19,7 +19,7 @@ interface Settings {
 
 export const getAll : GetHandler = async ({ request }) => {
     const [ todos, { enableJS } ] = await Promise.all([getTodoIds(), getSettings()])
-    if (todos.length === 0) return layout([], 0, 0)
+    if (todos.length === 0) return layout([], 0, 0, enableJS)
     let todoData = await getMany(todos)
     let activeCount = todoData.filter(x => !x.completed).length
     let count = todoData.length
