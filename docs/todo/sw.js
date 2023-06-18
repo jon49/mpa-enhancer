@@ -167,17 +167,17 @@ function layout(todos, activeCount, count, enableJS) {
 
 // src-todo/server/actions.ts
 var getAll = async ({ request }) => {
-  const [todos, { enableJS }] = await Promise.all([getTodoIds(), getSettings()]);
-  if (todos.length === 0)
-    return layout([], 0, 0, enableJS);
-  let todoData = await getMany(todos);
-  let activeCount = todoData.filter((x) => !x.completed).length;
-  let count = todoData.length;
+  let [todos, { enableJS }, state] = await Promise.all([getTodos(), getSettings(), getState()]);
+  let activeCount = todos.filter((x) => !x.completed).length;
+  let count = todos.length;
   if (request.url.endsWith("completed"))
-    todoData = todoData.filter((x) => x.completed);
+    todos = todos.filter((x) => x.completed);
   if (request.url.endsWith("active"))
-    todoData = todoData.filter((x) => !x.completed);
-  return layout(todoData, activeCount, count, enableJS);
+    todos = todos.filter((x) => !x.completed);
+  return layout(todos.map((x) => {
+    let editing = x.id === state.editing;
+    return { ...x, editing };
+  }), activeCount, count, enableJS);
 };
 var createTodo = async ({ data }) => {
   if (data.title === "")
@@ -187,7 +187,10 @@ var createTodo = async ({ data }) => {
   todos.push(newTodoId);
   await set("todos", todos);
   const newData = { ...data, completed: false, id: newTodoId, editing: false };
-  await set(newTodoId, newData);
+  await Promise.all([
+    set(newTodoId, newData),
+    clearState()
+  ]);
 };
 var updateTodo = async (opts) => {
   let { url, data } = opts;
@@ -197,7 +200,10 @@ var updateTodo = async (opts) => {
   const oldData = await getDataFromQueryId(url);
   if (!oldData)
     return;
-  await set(oldData.id, { ...oldData, ...data });
+  await Promise.all([
+    set(oldData.id, { ...oldData, ...data }),
+    clearState()
+  ]);
 };
 var deleteTodo = async ({ url }) => {
   const todos = await getTodoIds();
@@ -207,28 +213,28 @@ var deleteTodo = async ({ url }) => {
   const id = parseInt(idMaybe);
   const cleanedTodos = todos.filter((x) => x !== id);
   await set("todos", cleanedTodos);
-  await del(id);
+  await Promise.all([
+    del(id),
+    clearState()
+  ]);
 };
 var toggleComplete = async ({ url }) => {
   const oldData = await getDataFromQueryId(url);
   if (!oldData)
     return;
-  await set(oldData.id, { ...oldData, completed: !oldData.completed });
+  await Promise.all([
+    set(oldData.id, { ...oldData, completed: !oldData.completed }),
+    clearState()
+  ]);
 };
 var edit = async ({ url }) => {
-  const oldData = await getDataFromQueryId(url);
-  if (!oldData)
+  const idMaybe = url.searchParams.get("id");
+  if (!idMaybe)
     return;
-  const todos = await getTodos();
-  todos.forEach((x) => x.editing = false);
-  await Promise.all(todos.map((x) => set(x.id, x)));
-  await set(oldData.id, { ...oldData, editing: true });
+  await set("state", { editing: parseInt(idMaybe) });
 };
-var cancelEdit = async ({ url }) => {
-  const oldData = await getDataFromQueryId(url);
-  if (!oldData)
-    return;
-  await set(oldData.id, { ...oldData, editing: false });
+var cancelEdit = async () => {
+  await clearState();
 };
 async function getDataFromQueryId(url) {
   const idMaybe = url.searchParams.get("id");
@@ -238,6 +244,29 @@ async function getDataFromQueryId(url) {
   const oldData = await get(id);
   return oldData;
 }
+var toggleAll = async () => {
+  const todos = await getTodos();
+  const completed = !todos.every((x) => x.completed);
+  const newData = todos.map((x) => ({ ...x, completed }));
+  await Promise.all(newData.map((x) => set(x.id, x)).concat(clearState()));
+};
+var clearCompleted = async () => {
+  const todos = await getTodos();
+  const completed = todos.filter((x) => x.completed).map((x) => x.id);
+  await Promise.all(completed.map((x) => del(x)));
+  await Promise.all([
+    set("todos", todos.filter((x) => !completed.includes(x.id)).map((x) => x.id)),
+    clearState()
+  ]);
+};
+var toggleJS = async () => {
+  const settings = await getSettings();
+  settings.enableJS = !settings.enableJS;
+  await Promise.all([
+    set("settings", settings),
+    clearState()
+  ]);
+};
 async function getSettings() {
   const settings = await get("settings") ?? { enableJS: true };
   return settings;
@@ -248,28 +277,18 @@ async function getTodoIds() {
 }
 async function getTodos() {
   const todos = await getTodoIds();
+  if (todos.length === 0)
+    return [];
   const todoData = await getMany(todos);
   return todoData;
 }
-var toggleAll = async () => {
-  const todos = await getTodoIds();
-  const todoData = await getMany(todos);
-  const completed = !todoData.every((x) => x.completed);
-  const newData = todoData.map((x) => ({ ...x, completed }));
-  await Promise.all(newData.map((x) => set(x.id, x)));
-};
-var clearCompleted = async () => {
-  const todos = await getTodoIds();
-  const todoData = await getMany(todos);
-  const completed = todoData.filter((x) => x.completed).map((x) => x.id);
-  await Promise.all(completed.map((x) => del(x)));
-  await set("todos", todos.filter((x) => !completed.includes(x)));
-};
-var toggleJS = async () => {
-  const settings = await getSettings();
-  settings.enableJS = !settings.enableJS;
-  await set("settings", settings);
-};
+async function getState() {
+  const state = await get("state") ?? { editing: -1 };
+  return state;
+}
+async function clearState() {
+  await del("state");
+}
 
 // src-todo/sw.ts
 var version = "0.0.1";

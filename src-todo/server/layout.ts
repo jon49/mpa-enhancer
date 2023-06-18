@@ -1,13 +1,8 @@
 import html from "html-template-tag"
+import { TodoView } from "./actions"
 
-export interface Todo {
-    completed: boolean
-    title: string
-    id: number
-    editing: boolean
-}
 
-function todoView({ completed, title, id, editing }: Todo, enableJS: boolean) {
+function todoView({ completed, title, id, editing }: TodoView, enableJS: boolean) {
     let completedClass = completed ? "completed" : ""
     let editingClass = editing ? "editing" : ""
     let liClass = `class="${completedClass} ${editingClass}"`
@@ -59,7 +54,7 @@ function todoView({ completed, title, id, editing }: Todo, enableJS: boolean) {
     </li>`
 }
 
-export function layout(todos: Todo[], activeCount: number, count: number, enableJS: boolean) {
+export function layout(todos: TodoView[], activeCount: number, count: number, enableJS: boolean) {
     // @ts-ignore
     return html`
 <!doctype html>
