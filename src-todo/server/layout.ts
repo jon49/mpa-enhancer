@@ -121,7 +121,6 @@ export function layout(todos: Todo[], activeCount: number, count: number, enable
         <p>Created by <a href="https://jnyman.com">Jon Nyman</a></p>
         <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
     </footer>
-    <!--Scripts here.Don't remove ↓ -->
     $${enableJS ? `<script src="./js/lib/mpa.js"></script>` : ''}
 </body>
 </html>`
