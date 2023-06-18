@@ -122,8 +122,6 @@ export function layout(todos: Todo[], activeCount: number, count: number, enable
         <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
     </footer>
     <!--Scripts here.Don't remove ↓ -->
-    <script src="./js/sw-loader.js"></script>
-    <script src="./js/app.js"></script>
     $${enableJS ? `<script src="./js/lib/mpa.js"></script>` : ''}
 </body>
 </html>`

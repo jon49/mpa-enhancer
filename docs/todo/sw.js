@@ -1,7 +1,3 @@
-var __freeze = Object.freeze;
-var __defProp = Object.defineProperty;
-var __template = (cooked, raw) => __freeze(__defProp(cooked, "raw", { value: __freeze(raw || cooked.slice()) }));
-
 // node_modules/idb-keyval/dist/index.js
 function promisifyRequest(request) {
   return new Promise((resolve, reject) => {
@@ -106,15 +102,14 @@ function todoView({ completed, title, id, editing }, enableJS) {
         </form>
     </li>`;
 }
-var _a;
 function layout(todos, activeCount, count, enableJS) {
-  return e2(_a || (_a = __template([`
+  return e2`
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MPA Enhancer \u2022 TodoMVC</title>
+    <title>MPA Enhancer • TodoMVC</title>
     <link rel="stylesheet" href="./css/base.css">
     <link rel="stylesheet" href="./css/index.css">
     <!-- CSS overrides - remove if you don't need it -->
@@ -130,17 +125,45 @@ function layout(todos, activeCount, count, enableJS) {
                 placeholder="What needs to be done?"
                 autocomplete="off"
                 name="title"
-                `, '\n                >\n            </form>\n        </header>\n        <!-- This section should be hidden by default and shown when there are todos -->\n        <section id="todo-section" class="main ', '">\n            <form method="post" action="?handler=toggle-all">\n                <button id=toggle-all class="toggle-all-2">Mark all as complete</button>\n            </form>\n            <ul id="todo-list" class="todo-list">$', '</ul>\n        </section>\n        <!-- This footer should be hidden by default and shown when there are todos -->\n        <footer id="footer" class="footer ', '}">\n            <span class="todo-count">\n                <strong>', "</strong> item", ' left\n            </span>\n        <ul class="filters">\n            <li>\n                <a id=link-all class="selected" href="?filter=all">All</a>\n            </li>\n            <li><a id=link-active href="?filter=active">Active</a></li>\n            <li><a id=link-completed href="?filter=completed">Completed</a></li>\n        </ul>\n        <!--Hidden if no completed items are left \u2193 -->\n        $', '\n        </footer>\n    </section>\n    <footer class="info">\n        <p><form method=post action="?handler=toggle-js"><button>', `</button></form></p>
+                ${todos.length === 0 ? "autofocus" : ""}
+                >
+            </form>
+        </header>
+        <!-- This section should be hidden by default and shown when there are todos -->
+        <section id="todo-section" class="main ${todos.length === 0 ? "hidden" : ""}">
+            <form method="post" action="?handler=toggle-all">
+                <button id=toggle-all class="toggle-all-2">Mark all as complete</button>
+            </form>
+            <ul id="todo-list" class="todo-list">$${todos.map((x) => todoView(x, enableJS)).join("")}</ul>
+        </section>
+        <!-- This footer should be hidden by default and shown when there are todos -->
+        <footer id="footer" class="footer ${!count ? "hidden" : ""}}">
+            <span class="todo-count">
+                <strong>${"" + activeCount}</strong> item${activeCount === 1 ? "" : "s"} left
+            </span>
+        <ul class="filters">
+            <li>
+                <a id=link-all class="selected" href="?filter=all">All</a>
+            </li>
+            <li><a id=link-active href="?filter=active">Active</a></li>
+            <li><a id=link-completed href="?filter=completed">Completed</a></li>
+        </ul>
+        <!--Hidden if no completed items are left ↓ -->
+        $${count - activeCount === 0 ? "" : e2`<form method="post" action="?handler=clear-completed">
+                <button id="clear-completed" class="clear-completed">Clear completed</button>
+            </form>`}
+        </footer>
+    </section>
+    <footer class="info">
+        <p><form method=post action="?handler=toggle-js"><button>${enableJS ? "Disable JS" : "Enable JS"}</button></form></p>
         <p><a href="https://github.com/jon49/mpa-enhancer/tree/master/src-todo">Source Code</a></p >
         <p>Created by <a href="https://jnyman.com">Jon Nyman</a></p>
         <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
     </footer>
-    <!--Scripts here.Don't remove \u2193 -->
-    <script src="./js/sw-loader.js"><\/script>
-    <script src="./js/app.js"><\/script>
-    $`, "\n</body>\n</html>"])), todos.length === 0 ? "autofocus" : "", todos.length === 0 ? "hidden" : "", todos.map((x) => todoView(x, enableJS)).join(""), !count ? "hidden" : "", "" + activeCount, activeCount === 1 ? "" : "s", count - activeCount === 0 ? "" : e2`<form method="post" action="?handler=clear-completed">
-                <button id="clear-completed" class="clear-completed">Clear completed</button>
-            </form>`, enableJS ? "Disable JS" : "Enable JS", enableJS ? `<script src="./js/lib/mpa.js"><\/script>` : "");
+    <!--Scripts here.Don't remove ↓ -->
+    $${enableJS ? `<script src="./js/lib/mpa.js"><\/script>` : ""}
+</body>
+</html>`;
 }
 
 // src-todo/server/actions.ts
@@ -256,7 +279,6 @@ self.addEventListener("install", (e3) => {
   console.log(`Installing version '${version}' service worker.`);
   e3.waitUntil(
     caches.open(version).then((cache) => cache.addAll([
-      "/js/app.js",
       "/js/sw-loader.js",
       "/js/lib/mpa.js",
       "/css/base.css",

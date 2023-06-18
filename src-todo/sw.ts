@@ -21,7 +21,6 @@ self.addEventListener("install", e => {
         caches.open(version)
         // @ts-ignore
         .then(cache => cache.addAll([
-            "/js/app.js",
             "/js/sw-loader.js",
             "/js/lib/mpa.js",
             "/css/base.css",
