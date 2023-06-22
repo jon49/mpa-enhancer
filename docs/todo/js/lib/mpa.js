@@ -1,20 +1,21 @@
 // @ts-check
 (() => {
 
-let d = document,
-    w = window
+let doc = document,
+    w = window,
+    query = doc.querySelector.bind(doc)
 
 function getCleanUrlPath() {
-    let url = new URL(d.location.href)
+    let url = new URL(doc.location.href)
     return url.pathname.replace(/\/$/, "")
 }
 
 w.addEventListener('beforeunload', () => {
-    let active = d.activeElement
+    let active = doc.activeElement
     localStorage.pageLocation = JSON.stringify({
         href: getCleanUrlPath(),
         y: w.scrollY,
-        height: d.body.scrollHeight,
+        height: doc.body.scrollHeight,
         active: {
             id: active?.id,
             name: active?.getAttribute('name')
@@ -23,21 +24,32 @@ w.addEventListener('beforeunload', () => {
 })
 
 function load() {
-    if (d.querySelector('[autofocus]')) return
+    if (query('[autofocus]')) return
     let location = localStorage.pageLocation
     if (!location) return
     let { y, height, href, active: { id, name } } = JSON.parse(location)
-    if (y && href === getCleanUrlPath()) {
-        w.scrollTo({ top: y + d.body.scrollHeight - height })
+    let target = doc.body.dataset.mpaScrollTo
+    if (href === getCleanUrlPath() && (target || y)) {
+        if (target) {
+            let el = query(target)
+            el.scrollIntoView()
+        } else {
+            w.scrollTo({ top: y + doc.body.scrollHeight - height })
+        }
     }
     let active =
-        d.getElementById(id) ||
-        d.querySelector(`[name="${name}"]`)
-    if (active) {
-        active.focus()
-        // @ts-ignore
-        active.select instanceof  Function && active.select()
-    }
+        doc.getElementById(id)
+        || query(`[name="${name}"]`)
+    run('focus', active)
+    run('select', active)
+}
+
+/**
+* @param {string} method
+* @param {HTMLElement} el
+* */
+function run(method, el) {
+    el[method] && el[method]()
 }
 
 load()

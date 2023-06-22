@@ -115,7 +115,7 @@ function layout(todos, activeCount, count, enableJS) {
     <!-- CSS overrides - remove if you don't need it -->
     <link rel="stylesheet" href="./css/app.css">
 </head>
-<body>
+<body data-mpa-scroll-to="#toggle-all">
     <section class="todoapp">
         <header class="header">
             <h1>todos</h1>
