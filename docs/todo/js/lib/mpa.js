@@ -32,7 +32,7 @@ function load() {
     if (href === getCleanUrlPath() && (target || y)) {
         if (target) {
             let el = query(target)
-            el.scrollIntoView()
+            el?.scrollIntoView()
         } else {
             w.scrollTo({ top: y + doc.body.scrollHeight - height })
         }
