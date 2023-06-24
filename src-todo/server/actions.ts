@@ -20,32 +20,23 @@ interface Settings {
     enableJS: boolean
 }
 
-interface UIState {
-    editing: number
-}
-
 interface Todo {
     completed: boolean
     title: string
     id: number
 }
 
-export interface TodoView extends Todo {
-    editing: boolean
-}
+export interface TodoView extends Todo { }
 
 export const getAll : GetHandler = async ({ request }) => {
-    let [ todos, { enableJS }, state ] = await Promise.all([getTodos(), getSettings(), getState()])
+    let [ todos, { enableJS } ] = await Promise.all([getTodos(), getSettings()])
     let activeCount = todos.filter(x => !x.completed).length
     let count = todos.length
     if (request.url.endsWith("completed"))
         todos = todos.filter(x => x.completed)
     if (request.url.endsWith("active"))
         todos = todos.filter(x => !x.completed)
-    return layout(todos.map(x => {
-        let editing = x.id === state.editing
-        return { ...x, editing }
-    }), activeCount, count, enableJS)
+    return layout(todos, activeCount, count, enableJS)
 }
 
 export const createTodo : Handler = async({ data }) => {
@@ -54,23 +45,16 @@ export const createTodo : Handler = async({ data }) => {
     const newTodoId = Date.now()
     todos.push(newTodoId)
     await set("todos", todos)
-    const newData = { ...data, completed: false, id: newTodoId, editing: false }
-    await Promise.all([
-        set(newTodoId, newData),
-        clearState()
-    ])
+    const newData = { ...data, completed: false, id: newTodoId }
+    await set(newTodoId, newData)
 }
 
 export const updateTodo : Handler = async (opts) => {
     let { url, data } = opts
-    await cancelEdit(opts)
     if (data.title === "") return
     const oldData = await getDataFromQueryId(url)
     if (!oldData) return
-    await Promise.all([
-        set(oldData.id, { ...oldData, ...data }),
-        clearState()
-    ])
+    await set(oldData.id, { ...oldData, ...data })
 }
 
 export const deleteTodo : Handler = async ({ url }) => {
@@ -80,29 +64,13 @@ export const deleteTodo : Handler = async ({ url }) => {
     const id = parseInt(idMaybe)
     const cleanedTodos = todos.filter(x => x !== id)
     await set("todos", cleanedTodos)
-    await Promise.all([
-        del(id),
-        clearState()
-    ])
+    await del(id)
 }
 
 export const toggleComplete : Handler = async ({ url }) => {
     const oldData = await getDataFromQueryId(url)
     if (!oldData) return
-    await Promise.all([
-        set(oldData.id, { ...oldData, completed: !oldData.completed }),
-        clearState()
-    ])
-}
-
-export const edit : Handler = async ({ url }) => {
-    const idMaybe = url.searchParams.get("id")
-    if (!idMaybe) return
-    await set("state", { editing: parseInt(idMaybe) })
-}
-
-export const cancelEdit : Handler = async () => {
-    await clearState()
+    await set(oldData.id, { ...oldData, completed: !oldData.completed })
 }
 
 async function getDataFromQueryId(url: URL) {
@@ -117,26 +85,20 @@ export const toggleAll : Handler = async () => {
     const todos = await getTodos()
     const completed = !todos.every(x => x.completed)
     const newData = todos.map(x => ({ ...x, completed: completed }))
-    await Promise.all(newData.map(x => set(x.id, x)).concat(clearState()))
+    await Promise.all(newData.map(x => set(x.id, x)))
 }
 
 export const clearCompleted : Handler = async () => {
     const todos = await getTodos()
     const completed = todos.filter(x => x.completed).map(x => x.id)
     await Promise.all(completed.map(x => del(x)))
-    await Promise.all([
-        set("todos", todos.filter(x => !completed.includes(x.id)).map(x => x.id)),
-        clearState()
-    ])
+    await set("todos", todos.filter(x => !completed.includes(x.id)).map(x => x.id))
 }
 
 export const toggleJS : Handler = async () => {
     const settings = await getSettings()
     settings.enableJS = !settings.enableJS
-    await Promise.all([
-        set("settings", settings),
-        clearState()
-    ])
+    await set("settings", settings)
 }
 
 async function getSettings() {
@@ -154,14 +116,5 @@ async function getTodos() {
     if (todos.length === 0) return []
     const todoData : Todo[] = await getMany(todos)
     return todoData
-}
-
-async function getState() {
-    const state : UIState = (await get("state")) ?? { editing: -1 }
-    return state
-}
-
-async function clearState() {
-    await del("state")
 }
 

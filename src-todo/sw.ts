@@ -1,9 +1,7 @@
 import {
-    cancelEdit,
     clearCompleted,
     createTodo,
     deleteTodo,
-    edit,
     getAll,
     toggleAll,
     toggleComplete,
@@ -88,12 +86,6 @@ async function handle(handler: string, request: Request, url: URL) {
             break
         case "clear-completed":
             await clearCompleted(opt)
-            break
-        case "cancel-edit":
-            await cancelEdit(opt)
-            break
-        case "edit":
-            await edit(opt)
             break
         case "toggle-js":
             await toggleJS(opt)

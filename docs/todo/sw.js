@@ -57,10 +57,9 @@ function e2(e3) {
 }
 
 // src-todo/server/layout.ts
-function todoView({ completed, title, id, editing }, enableJS) {
+function todoView({ completed, title, id }, enableJS) {
   let completedClass = completed ? "completed" : "";
-  let editingClass = editing ? "editing" : "";
-  let liClass = `class="${completedClass} ${editingClass}"`;
+  let liClass = `class="${completedClass}"`;
   return e2`
     <li $${liClass}>
         <form method="post" action="?handler=toggle-complete&id=$${"" + id}">
@@ -71,33 +70,16 @@ function todoView({ completed, title, id, editing }, enableJS) {
             >$${completed ? "&#10004;" : ""}</button>
         </form>
         <form method="post">
-            $${!editing ? e2`
-                <label
-                    id="edit_${"" + id}"
-                    class="view"
-                    >${title}
-                    <button
-                        id="edit_${"" + id}"
-                        class="edit-text"
-                        title="Edit"
-                        aria-label="Edit"
-                        formaction="?handler=edit&id=${"" + id}">
-                        &#9998;</button>
-                    </label>` : ""}
-            $${!editing ? "" : e2`
             <div>
                 <input
                     id="edit_${"" + id}"
                     class="edit"
                     value="${title}"
                     name="title"
-                    autocomplete="off"
-                    ${enableJS ? "" : "autofocus"}
-                    >
+                    autocomplete="off" >
+                <label for="edit_${"" + id}" class="view">${title} &#9998;</label>
                 <button hidden formaction="?handler=update&id=${"" + id}"></button>
-                <button id="edit_${"" + id}" class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
             </div>
-            `}
             <button class="destroy" formaction="?handler=delete&id=${"" + id}"></button>
         </form>
     </li>`;
@@ -125,7 +107,7 @@ function layout(todos, activeCount, count, enableJS) {
                 placeholder="What needs to be done?"
                 autocomplete="off"
                 name="title"
-                ${todos.length === 0 ? "autofocus" : ""}
+                ${todos.length === 0 || !enableJS ? "autofocus" : ""}
                 >
             </form>
         </header>
@@ -167,17 +149,14 @@ function layout(todos, activeCount, count, enableJS) {
 
 // src-todo/server/actions.ts
 var getAll = async ({ request }) => {
-  let [todos, { enableJS }, state] = await Promise.all([getTodos(), getSettings(), getState()]);
+  let [todos, { enableJS }] = await Promise.all([getTodos(), getSettings()]);
   let activeCount = todos.filter((x) => !x.completed).length;
   let count = todos.length;
   if (request.url.endsWith("completed"))
     todos = todos.filter((x) => x.completed);
   if (request.url.endsWith("active"))
     todos = todos.filter((x) => !x.completed);
-  return layout(todos.map((x) => {
-    let editing = x.id === state.editing;
-    return { ...x, editing };
-  }), activeCount, count, enableJS);
+  return layout(todos, activeCount, count, enableJS);
 };
 var createTodo = async ({ data }) => {
   if (data.title === "")
@@ -186,24 +165,17 @@ var createTodo = async ({ data }) => {
   const newTodoId = Date.now();
   todos.push(newTodoId);
   await set("todos", todos);
-  const newData = { ...data, completed: false, id: newTodoId, editing: false };
-  await Promise.all([
-    set(newTodoId, newData),
-    clearState()
-  ]);
+  const newData = { ...data, completed: false, id: newTodoId };
+  await set(newTodoId, newData);
 };
 var updateTodo = async (opts) => {
   let { url, data } = opts;
-  await cancelEdit(opts);
   if (data.title === "")
     return;
   const oldData = await getDataFromQueryId(url);
   if (!oldData)
     return;
-  await Promise.all([
-    set(oldData.id, { ...oldData, ...data }),
-    clearState()
-  ]);
+  await set(oldData.id, { ...oldData, ...data });
 };
 var deleteTodo = async ({ url }) => {
   const todos = await getTodoIds();
@@ -213,28 +185,13 @@ var deleteTodo = async ({ url }) => {
   const id = parseInt(idMaybe);
   const cleanedTodos = todos.filter((x) => x !== id);
   await set("todos", cleanedTodos);
-  await Promise.all([
-    del(id),
-    clearState()
-  ]);
+  await del(id);
 };
 var toggleComplete = async ({ url }) => {
   const oldData = await getDataFromQueryId(url);
   if (!oldData)
     return;
-  await Promise.all([
-    set(oldData.id, { ...oldData, completed: !oldData.completed }),
-    clearState()
-  ]);
-};
-var edit = async ({ url }) => {
-  const idMaybe = url.searchParams.get("id");
-  if (!idMaybe)
-    return;
-  await set("state", { editing: parseInt(idMaybe) });
-};
-var cancelEdit = async () => {
-  await clearState();
+  await set(oldData.id, { ...oldData, completed: !oldData.completed });
 };
 async function getDataFromQueryId(url) {
   const idMaybe = url.searchParams.get("id");
@@ -248,24 +205,18 @@ var toggleAll = async () => {
   const todos = await getTodos();
   const completed = !todos.every((x) => x.completed);
   const newData = todos.map((x) => ({ ...x, completed }));
-  await Promise.all(newData.map((x) => set(x.id, x)).concat(clearState()));
+  await Promise.all(newData.map((x) => set(x.id, x)));
 };
 var clearCompleted = async () => {
   const todos = await getTodos();
   const completed = todos.filter((x) => x.completed).map((x) => x.id);
   await Promise.all(completed.map((x) => del(x)));
-  await Promise.all([
-    set("todos", todos.filter((x) => !completed.includes(x.id)).map((x) => x.id)),
-    clearState()
-  ]);
+  await set("todos", todos.filter((x) => !completed.includes(x.id)).map((x) => x.id));
 };
 var toggleJS = async () => {
   const settings = await getSettings();
   settings.enableJS = !settings.enableJS;
-  await Promise.all([
-    set("settings", settings),
-    clearState()
-  ]);
+  await set("settings", settings);
 };
 async function getSettings() {
   const settings = await get("settings") ?? { enableJS: true };
@@ -281,13 +232,6 @@ async function getTodos() {
     return [];
   const todoData = await getMany(todos);
   return todoData;
-}
-async function getState() {
-  const state = await get("state") ?? { editing: -1 };
-  return state;
-}
-async function clearState() {
-  await del("state");
 }
 
 // src-todo/sw.ts
@@ -355,12 +299,6 @@ async function handle(handler, request, url) {
       break;
     case "clear-completed":
       await clearCompleted(opt);
-      break;
-    case "cancel-edit":
-      await cancelEdit(opt);
-      break;
-    case "edit":
-      await edit(opt);
       break;
     case "toggle-js":
       await toggleJS(opt);

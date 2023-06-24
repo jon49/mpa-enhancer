@@ -28,14 +28,10 @@ function load() {
     let location = localStorage.pageLocation
     if (!location) return
     let { y, height, href, active: { id, name } } = JSON.parse(location)
-    let target = doc.body.dataset.mpaScrollTo
-    if (href === getCleanUrlPath() && (target || y)) {
-        if (target) {
-            let el = query(target)
-            el?.scrollIntoView()
-        } else {
-            w.scrollTo({ top: y + doc.body.scrollHeight - height })
-        }
+    if (!doc.body.hasAttribute('data-ignore-scroll')
+        && href === getCleanUrlPath()
+        && y) {
+        w.scrollTo({ top: y + doc.body.scrollHeight - height })
     }
     let active =
         doc.getElementById(id)
@@ -49,7 +45,7 @@ function load() {
 * @param {HTMLElement} el
 * */
 function run(method, el) {
-    el[method] && el[method]()
+    el && el[method] && el[method]()
 }
 
 load()

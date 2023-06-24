@@ -2,10 +2,9 @@ import html from "html-template-tag"
 import { TodoView } from "./actions"
 
 
-function todoView({ completed, title, id, editing }: TodoView, enableJS: boolean) {
+function todoView({ completed, title, id }: TodoView, enableJS: boolean) {
     let completedClass = completed ? "completed" : ""
-    let editingClass = editing ? "editing" : ""
-    let liClass = `class="${completedClass} ${editingClass}"`
+    let liClass = `class="${completedClass}"`
     // @ts-ignore
     return html`
     <li $${liClass}>
@@ -17,38 +16,16 @@ function todoView({ completed, title, id, editing }: TodoView, enableJS: boolean
             >$${completed ? "&#10004;" : ""}</button>
         </form>
         <form method="post">
-            $${!editing
-            ? html`
-                <label
-                    id="edit_${"" + id}"
-                    class="view"
-                    >${title}
-                    <button
-                        id="edit_${"" + id}"
-                        class="edit-text"
-                        title="Edit"
-                        aria-label="Edit"
-                        formaction="?handler=edit&id=${"" + id}">
-                        &#9998;</button>
-                    </label>`
-            : ""}
-            $${!editing
-            ? ""
-            : html`
             <div>
                 <input
                     id="edit_${"" + id}"
                     class="edit"
                     value="${title}"
                     name="title"
-                    autocomplete="off"
-                    ${enableJS ? "" : "autofocus"}
-                    >
+                    autocomplete="off" >
+                <label for="edit_${"" + id}" class="view">${title} &#9998;</label>
                 <button hidden formaction="?handler=update&id=${"" + id}"></button>
-                <button id="edit_${"" + id}" class="cancel-edit" title="Cancel" aria-label="Cancel" formaction="?handler=cancel-edit&id=${"" + id}">&#10008;</button>
             </div>
-            `
-        }
             <button class="destroy" formaction="?handler=delete&id=${"" + id}"></button>
         </form>
     </li>`
@@ -78,7 +55,7 @@ export function layout(todos: TodoView[], activeCount: number, count: number, en
                 placeholder="What needs to be done?"
                 autocomplete="off"
                 name="title"
-                ${todos.length === 0 ? 'autofocus' : ''}
+                ${todos.length === 0 || !enableJS ? 'autofocus' : ''}
                 >
             </form>
         </header>
