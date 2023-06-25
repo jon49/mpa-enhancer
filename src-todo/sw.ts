@@ -13,12 +13,6 @@ const version = "0.0.1"
 const root = self.location.pathname.replace('/sw.js', '')
 
 self.addEventListener("install", async e => {
-    console.log(`Installing version '${version}' service worker.`)
-    if (await caches.has(version)) {
-        console.log(`Version '${version}' already installed.`)
-        return
-    }
-
     // @ts-ignore
     e.waitUntil(
         caches.open(version)

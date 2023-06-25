@@ -238,11 +238,6 @@ async function getTodos() {
 var version = "0.0.1";
 var root = self.location.pathname.replace("/sw.js", "");
 self.addEventListener("install", async (e3) => {
-  console.log(`Installing version '${version}' service worker.`);
-  if (await caches.has(version)) {
-    console.log(`Version '${version}' already installed.`);
-    return;
-  }
   e3.waitUntil(
     caches.open(version).then((cache) => cache.addAll([
       "/js/sw-loader.js",
