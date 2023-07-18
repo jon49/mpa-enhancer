@@ -37,30 +37,69 @@ function del(key, customStore = defaultGetStore()) {
   });
 }
 
-// node_modules/html-es6cape/dist/index.esm.js
-var t = { "&": "&amp;", ">": "&gt;", "<": "&lt;", '"': "&quot;", "'": "&#39;", "`": "&#96;" };
-var e = new RegExp(Object.keys(t).join("|"), "g");
-function n(n2) {
-  return void 0 === n2 && (n2 = ""), String(n2).replace(e, function(e3) {
-    return t[e3];
-  });
+// node_modules/html-template-tag-stream/lib/index.js
+var chars = {
+  "&": "&amp;",
+  ">": "&gt;",
+  "<": "&lt;",
+  '"': "&quot;",
+  "'": "&#39;",
+  "`": "&#96;"
+};
+var chars_default = chars;
+var re = new RegExp(Object.keys(chars_default).join("|"), "g");
+function escape(str = "") {
+  return String(str).replace(re, (match) => chars_default[match]);
 }
-
-// node_modules/html-template-tag/dist/index.esm.js
-function e2(e3) {
-  for (var a = [], t2 = 1; t2 < arguments.length; t2++)
-    a[t2 - 1] = arguments[t2];
-  return e3.raw.reduce(function(t3, n2, i) {
-    var o = a[i - 1];
-    return Array.isArray(o) ? o = o.join("") : e3.raw[i - 1] && e3.raw[i - 1].endsWith("$") ? t3 = t3.slice(0, -1) : o = n(o), t3 + o + n2;
-  });
+var html_es6cape_default = escape;
+var htmlPrototype = Object.getPrototypeOf(html);
+async function* typeChecker(sub, isRawHtml) {
+  const type = typeof sub, isPromise = sub instanceof Promise;
+  if (sub == null) {
+  } else if (type === "string") {
+    yield isRawHtml ? sub : html_es6cape_default(sub);
+  } else if (type === "number") {
+    yield "" + sub;
+  } else if (isPromise || sub instanceof Function) {
+    sub = isPromise ? await sub : sub();
+    for await (const s of typeChecker(sub, isRawHtml)) {
+      yield s;
+    }
+  } else if (Array.isArray(sub)) {
+    for await (const s of sub) {
+      for await (const x of typeChecker(s, true)) {
+        yield x;
+      }
+    }
+  } else if (sub.constructor === htmlPrototype) {
+    for await (const s of sub) {
+      yield s;
+    }
+  } else {
+    yield isRawHtml ? sub.toString() : html_es6cape_default(sub.toString());
+  }
 }
+async function* html(literals, ...subs) {
+  const lits = literals.raw, length = lits.length;
+  let isRawHtml = true;
+  for (let i = 0; i < length; i++) {
+    let lit = lits[i];
+    const sub = subs[i - 1];
+    for await (const s of typeChecker(sub, isRawHtml)) {
+      yield s;
+    }
+    lit = (isRawHtml = lit.endsWith("$")) ? lit.slice(0, -1) : lit;
+    if (lit)
+      yield lit;
+  }
+}
+var async_generator_html_default = html;
 
 // src-todo/server/layout.ts
-function todoView({ completed, title, id }, enableJS) {
+function todoView({ completed, title, id }) {
   let completedClass = completed ? "completed" : "";
   let liClass = `class="${completedClass}"`;
-  return e2`
+  return async_generator_html_default`
     <li $${liClass}>
         <form method="post" action="?handler=toggle-complete&id=$${"" + id}">
             <button
@@ -85,7 +124,7 @@ function todoView({ completed, title, id }, enableJS) {
     </li>`;
 }
 function layout(todos, activeCount, count, enableJS) {
-  return e2`
+  return async_generator_html_default`
 <!doctype html>
 <html lang="en">
 <head>
@@ -116,7 +155,7 @@ function layout(todos, activeCount, count, enableJS) {
             <form method="post" action="?handler=toggle-all">
                 <button id=toggle-all class="toggle-all-2">Mark all as complete</button>
             </form>
-            <ul id="todo-list" class="todo-list">$${todos.map((x) => todoView(x, enableJS)).join("")}</ul>
+            <ul id="todo-list" class="todo-list">${todos.map((x) => todoView(x, enableJS))}</ul>
         </section>
         <!-- This footer should be hidden by default and shown when there are todos -->
         <footer id="footer" class="footer ${!count ? "hidden" : ""}}">
@@ -131,7 +170,7 @@ function layout(todos, activeCount, count, enableJS) {
             <li><a id=link-completed href="?filter=completed">Completed</a></li>
         </ul>
         <!--Hidden if no completed items are left ↓ -->
-        $${count - activeCount === 0 ? "" : e2`<form method="post" action="?handler=clear-completed">
+        $${count - activeCount === 0 ? "" : async_generator_html_default`<form method="post" action="?handler=clear-completed">
                 <button id="clear-completed" class="clear-completed">Clear completed</button>
             </form>`}
         </footer>
@@ -237,8 +276,8 @@ async function getTodos() {
 // src-todo/sw.ts
 var version = "0.0.1";
 var root = self.location.pathname.replace("/sw.js", "");
-self.addEventListener("install", async (e3) => {
-  e3.waitUntil(
+self.addEventListener("install", async (e) => {
+  e.waitUntil(
     caches.open(version).then((cache) => cache.addAll([
       "/js/sw-loader.js",
       "/js/lib/mpa.js",
@@ -248,38 +287,50 @@ self.addEventListener("install", async (e3) => {
     ].map((x) => root + x)))
   );
 });
-self.addEventListener("fetch", (e3) => e3.respondWith(getResponse(e3)));
-self.addEventListener("activate", async (e3) => {
+self.addEventListener("fetch", (e) => e.respondWith(getResponse(e)));
+self.addEventListener("activate", async (e) => {
   console.log(`Service worker activated. Cache version '${version}'.`);
   const keys = await caches.keys();
-  if (e3.waitUntil) {
+  if (e.waitUntil) {
     let cacheDeletes = keys.map((x) => version !== x && caches.delete(x)).filter((x) => x);
     if (cacheDeletes.length === 0)
       return;
-    e3.waitUntil(Promise.all(cacheDeletes));
+    e.waitUntil(Promise.all(cacheDeletes));
   }
 });
-async function getResponse(e3) {
-  const url = new URL(e3.request.url);
+async function getResponse(e) {
+  const url = new URL(e.request.url);
   console.log(`Fetching '${url.pathname}'`);
-  if (url.pathname === root + "/" && e3.request.method === "GET") {
-    const index = await getAll({ request: e3.request, url });
-    return new Response(index, {
-      headers: {
-        "Content-Type": "text/html"
-      }
-    });
+  if (url.pathname === root + "/" && e.request.method === "GET") {
+    const index = await getAll({ request: e.request, url });
+    return streamResponse(index);
   }
   const handler = url.searchParams.get("handler");
   if (handler) {
-    return handle(handler, e3.request, url);
+    return handle(handler, e.request, url);
   }
   return caches.match(url.pathname);
+}
+var encoder = new TextEncoder();
+function streamResponse(generator) {
+  const stream = new ReadableStream({
+    async start(controller) {
+      for await (let s of generator) {
+        controller.enqueue(encoder.encode(s));
+      }
+      controller.close();
+    }
+  });
+  return new Response(
+    stream,
+    {
+      headers: { "content-type": "text/html; charset=utf-8" }
+    }
+  );
 }
 async function handle(handler, request, url) {
   const data = await getData(request, url);
   const opt = { request, url, data };
-  let task = null;
   switch (handler) {
     case "create":
       await createTodo(opt);

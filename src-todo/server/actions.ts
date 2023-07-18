@@ -14,7 +14,7 @@ interface GetHandlerOptions {
 }
 
 type Handler = (o: RequestOptions) => Promise<void>
-type GetHandler = (o: GetHandlerOptions) => Promise<string>
+type GetHandler = (o: GetHandlerOptions) => Promise<AsyncGenerator<string>>
 
 interface Settings {
     enableJS: boolean

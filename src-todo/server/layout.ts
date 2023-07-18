@@ -1,8 +1,7 @@
-import html from "html-template-tag"
+import html from "html-template-tag-stream"
 import { TodoView } from "./actions"
 
-
-function todoView({ completed, title, id }: TodoView, enableJS: boolean) {
+function todoView({ completed, title, id }: TodoView) {
     let completedClass = completed ? "completed" : ""
     let liClass = `class="${completedClass}"`
     // @ts-ignore
@@ -64,7 +63,7 @@ export function layout(todos: TodoView[], activeCount: number, count: number, en
             <form method="post" action="?handler=toggle-all">
                 <button id=toggle-all class="toggle-all-2">Mark all as complete</button>
             </form>
-            <ul id="todo-list" class="todo-list">$${todos.map(x => todoView(x, enableJS)).join('')}</ul>
+            <ul id="todo-list" class="todo-list">${todos.map(x => todoView(x, enableJS))}</ul>
         </section>
         <!-- This footer should be hidden by default and shown when there are todos -->
         <footer id="footer" class="footer ${!count ? 'hidden' : ''}}">
