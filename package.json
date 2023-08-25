@@ -1,6 +1,6 @@
 {
   "name": "mpa-enhancer",
-  "version": "1.1.0",
+  "version": "2.1.1",
   "description": "Minimalist JavaScript to make your MPA work that much better",
   "main": "src/mpa.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "todo": "cp ./node_modules/todomvc-app-css/index.css ./docs/todo/css/index.css && cp ./node_modules/todomvc-common/base.css ./docs/todo/css/base.css",
     "make-dirs": "mkdir -p docs/todo/js docs/todo/css docs/todo/js/lib",
     "clean": "rm -rf docs/todo",
-    "build": "npm run clean && npm run make-dirs && npm run static && esbuild --format=esm --outdir=docs/todo --bundle ./src-todo/sw.ts",
+    "build": "npm run clean && npm run make-dirs && npm run static && esbuild --format=esm --outdir=docs/todo --bundle ./src-todo/sw.ts && npm run build-mpa",
     "build-mpa": "npx esbuild src/mpa.js --minify --outfile=src/mpa.min.js"
   },
   "author": "",
