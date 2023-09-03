@@ -2,6 +2,10 @@
   "name": "mpa-enhancer",
   "version": "2.1.1",
   "description": "Minimalist JavaScript to make your MPA work that much better",
+  "bugs": {
+    "url": "https://github.com/jon49/mpa-enhancer/issues"
+  },
+  "homepage": "https://github.com/jon49/mpa-enhancer#readme",
   "main": "src/mpa.js",
   "scripts": {
     "start": "npm run clean && npm run make-dirs && npm run static && esbuild --format=esm --watch --outdir=docs/todo --bundle --servedir=docs/todo ./src-todo/sw.ts",
@@ -13,8 +17,8 @@
     "build": "npm run clean && npm run make-dirs && npm run static && esbuild --format=esm --outdir=docs/todo --bundle ./src-todo/sw.ts && npm run build-mpa",
     "build-mpa": "npx esbuild src/mpa.js --minify --outfile=src/mpa.min.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Jon Nyman",
+  "license": "MIT",
   "devDependencies": {
     "esbuild": "^0.18.3"
   },
