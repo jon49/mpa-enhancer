@@ -14,10 +14,13 @@ function hasAttr(el, name) {
     return el?.hasAttribute(name)
 }
 
-function getCleanUrlPath() {
+function getPageName() {
+    let pageName = doc.body.getAttribute('mpa-page-name')
+    if (pageName) return pageName
     let url = new URL(doc.location.href)
     return url.pathname.replace(/\/$/, "")
 }
+
 
 let lastClick = null
 w.addEventListener('click', e => {
@@ -25,24 +28,36 @@ w.addEventListener('click', e => {
 })
 
 w.addEventListener('beforeunload', () => {
+    let data = getData() || {}
+    let persistedPages = new Set(data.__ || [])
+    let pageName = getPageName()
+    if (hasAttr(doc.body, 'mpa-persist')) {
+        persistedPages.add(pageName)
+        data.__ = Array.from(persistedPages)
+    }
+    for (let key in Object.keys(data)) {
+        if (persistedPages.has(key) || key === '__') continue
+        delete data[key]
+    }
+
     let active = doc.activeElement
     let target = doc.activeElement === doc.body ? lastClick : active
-    localStorage.pageLocation = JSON.stringify({
-        href: getCleanUrlPath(),
+    data[pageName] = {
         y: w.scrollY,
         height: doc.body.scrollHeight,
         active: {
             id: target?.id,
             name: target?.getAttribute('name')
         }
-    })
+    }
+    localStorage.pageLocations = JSON.stringify(data)
 })
 
 function load() {
     if (query('[autofocus]')) return
-    let location = localStorage.pageLocation
+    let location = getData(getPageName())
     if (!location) return
-    let { y, height, href, active: { id, name } } = JSON.parse(location)
+    let { y, height, active: { id, name } } = location
 
     let active =
         doc.getElementById(id)
@@ -52,9 +67,7 @@ function load() {
         run('select', active)
     }
 
-    if (!hasAttr(doc.body, 'mpa-skip-scroll')
-        && href === getCleanUrlPath()
-        && y) {
+    if (!hasAttr(doc.body, 'mpa-skip-scroll') && y) {
         w.scrollTo({ top: y + doc.body.scrollHeight - height })
     }
 }
@@ -65,6 +78,15 @@ function load() {
 * */
 function run(method, el) {
     el && el[method] && el[method]()
+}
+
+/**
+* @param {string} [name]
+*/
+function getData(name) {
+    let data = localStorage.pageLocations
+    data = data && JSON.parse(data)
+    return name == null ? data : data && data[name]
 }
 
 load()
