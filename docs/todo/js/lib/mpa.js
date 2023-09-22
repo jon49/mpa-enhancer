@@ -27,7 +27,7 @@ w.addEventListener('click', e => {
     lastClick = e.target
 })
 
-w.addEventListener('beforeunload', () => {
+w.addEventListener('unload', () => {
     let data = getData() || {}
     let persistedPages = new Set(data.__ || [])
     let pageName = getPageName()
