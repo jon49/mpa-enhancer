@@ -50,6 +50,10 @@ spot. Use it like so:
 
 ## Change Log
 
+**2.2.2**
+
+Improved scrolling location.
+
 **2.2.1**
 
 Fixed not working on Firefox and switched from even `beforeunload` to `unload`.

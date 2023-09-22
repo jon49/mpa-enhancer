@@ -43,8 +43,8 @@ w.addEventListener('unload', () => {
     let active = doc.activeElement
     let target = doc.activeElement === doc.body ? lastClick : active
     data[pageName] = {
+        elY: target?.getBoundingClientRect().top,
         y: w.scrollY,
-        height: doc.body.scrollHeight,
         active: {
             id: target?.id,
             name: target?.getAttribute('name')
@@ -57,7 +57,7 @@ function load() {
     if (query('[autofocus]')) return
     let location = getData(getPageName())
     if (!location) return
-    let { y, height, active: { id, name } } = location
+    let { y, elY, active: { id, name } } = location
 
     let active =
         doc.getElementById(id)
@@ -68,7 +68,13 @@ function load() {
     }
 
     if (!hasAttr(doc.body, 'mpa-skip-scroll') && y) {
-        w.scrollTo({ top: y + doc.body.scrollHeight - height })
+        if (active) {
+            // Scroll to where element was before
+            w.scrollTo({ top: w.scrollY + active.getBoundingClientRect().top - elY })
+        } else {
+            // Scroll to where page was before
+            w.scrollTo({ top: y })
+        }
     }
 }
 
@@ -92,4 +98,5 @@ function getData(name) {
 load()
 
 })()
+
 
