@@ -48,9 +48,19 @@ spot. Use it like so:
 <input name=my-name mpa-skip-scroll>
 ```
 
+`mpa-miss`: This will give a back up location if the ID/name element is no
+longer on the page after a refresh. You can supply it a back up location. Use it
+like so:
+
+```html
+<div id="my-backup-location" mpa-miss="#my-backup-location">
+    <input name=delete-me>
+</div>
+```
+
 ## Change Log
 
-**2.2.2**
+**2.2.2/3**
 
 Improved scrolling location.
 

@@ -14,8 +14,16 @@ function hasAttr(el, name) {
     return el?.hasAttribute(name)
 }
 
+/**
+* @param {HTMLElement} el
+* @param {string} name
+*/
+function getAttr(el, name) {
+    return el?.getAttribute(name)
+}
+
 function getPageName() {
-    let pageName = doc.body.getAttribute('mpa-page-name')
+    let pageName = getAttr(doc.body, 'mpa-page-name')
     if (pageName) return pageName
     let url = new URL(doc.location.href)
     return url.pathname.replace(/\/$/, "")
@@ -41,12 +49,13 @@ w.addEventListener('unload', () => {
     }
 
     let active = doc.activeElement
-    let target = doc.activeElement === doc.body ? lastClick : active
+    let target = active === doc.body ? lastClick : active
     data[pageName] = {
         elY: target?.getBoundingClientRect().top,
         y: w.scrollY,
         active: {
             id: target?.id,
+            miss: getAttr(target?.closest('[mpa-miss]'), 'mpa-miss'),
             name: target?.getAttribute('name')
         }
     }
@@ -57,11 +66,12 @@ function load() {
     if (query('[autofocus]')) return
     let location = getData(getPageName())
     if (!location) return
-    let { y, elY, active: { id, name } } = location
+    let { y, elY, active: { id, name, miss } } = location
 
     let active =
         doc.getElementById(id)
         || query(`[name="${name}"]`)
+        || query(miss)
     if (!hasAttr(active, 'mpa-skip-focus')) {
         run('focus', active)
         run('select', active)
@@ -69,8 +79,10 @@ function load() {
 
     if (!hasAttr(doc.body, 'mpa-skip-scroll') && y) {
         if (active) {
+            // Scroll to where element was before
             w.scrollTo({ top: w.scrollY + active.getBoundingClientRect().top - elY })
         } else {
+            // Scroll to where page was before
             w.scrollTo({ top: y })
         }
     }
