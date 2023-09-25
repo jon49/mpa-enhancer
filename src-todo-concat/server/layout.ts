@@ -1,4 +1,4 @@
-import html from "html-template-tag-stream"
+import html from "html-template-tag"
 import { TodoView } from "./actions"
 
 function todoView({ completed, title, id }: TodoView) {
@@ -63,7 +63,7 @@ export function layout(todos: TodoView[], activeCount: number, count: number, en
             <form method="post" action="?handler=toggle-all">
                 <button id=toggle-all class="toggle-all-2">Mark all as complete</button>
             </form>
-            <ul id="todo-list" class="todo-list">${todos.map(todoView)}</ul>
+            <ul id="todo-list" class="todo-list">$${todos.map(todoView).join("")}</ul>
         </section>
         <!-- This footer should be hidden by default and shown when there are todos -->
         <footer id="footer" class="footer ${!count ? 'hidden' : ''}}">

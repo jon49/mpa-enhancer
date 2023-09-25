@@ -15,7 +15,8 @@
     "make-dirs": "mkdir -p docs/todo/js docs/todo/css docs/todo/js/lib",
     "clean": "rm -rf docs/todo",
     "build": "npm run clean && npm run make-dirs && npm run static && esbuild --format=esm --outdir=docs/todo --bundle ./src-todo/sw.ts && npm run build-mpa",
-    "build-mpa": "npx esbuild src/mpa.js --minify --outfile=src/mpa.min.js"
+    "build-mpa": "npx esbuild src/mpa.js --minify --outfile=src/mpa.min.js",
+    "start-concat": "pwd; ./tasks/start-concat.sh"
   },
   "author": "Jon Nyman",
   "license": "MIT",
@@ -23,6 +24,7 @@
     "esbuild": "^0.18.3"
   },
   "dependencies": {
+    "html-template-tag": "^4.0.1",
     "html-template-tag-stream": "^1.1.2",
     "idb-keyval": "^6.2.1",
     "todomvc-app-css": "^2.4.2",

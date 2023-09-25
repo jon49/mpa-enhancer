@@ -61,19 +61,9 @@ async function getResponse(e: FetchEvent) {
     return caches.match(url.pathname)
 }
 
-const encoder = new TextEncoder()
-function streamResponse(generator: AsyncGenerator<any, void, unknown>) {
-    const stream = new ReadableStream({
-        async start(controller : ReadableStreamDefaultController<any>) {
-            for await (let s of generator) {
-                controller.enqueue(encoder.encode(s))
-            }
-            controller.close()
-        }
-    })
-
+function streamResponse(htmlValue: string) {
     return new Response(
-        stream, {
+        htmlValue, {
             headers: { "content-type": "text/html; charset=utf-8" }
         })
 }
