@@ -72,10 +72,10 @@ export function layout(todos: TodoView[], activeCount: number, count: number, en
             </span>
         <ul class="filters">
             <li>
-                <a id=link-all class="selected" href="?filter=all">All</a>
+                <a class="selected" href="?filter=all">All</a>
             </li>
-            <li><a id=link-active href="?filter=active">Active</a></li>
-            <li><a id=link-completed href="?filter=completed">Completed</a></li>
+            <li><a href="?filter=active">Active</a></li>
+            <li><a href="?filter=completed">Completed</a></li>
         </ul>
         <!--Hidden if no completed items are left ↓ -->
         ${ count - activeCount === 0

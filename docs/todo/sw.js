@@ -164,10 +164,10 @@ function layout(todos, activeCount, count, enableJS) {
             </span>
         <ul class="filters">
             <li>
-                <a id=link-all class="selected" href="?filter=all">All</a>
+                <a class="selected" href="?filter=all">All</a>
             </li>
-            <li><a id=link-active href="?filter=active">Active</a></li>
-            <li><a id=link-completed href="?filter=completed">Completed</a></li>
+            <li><a href="?filter=active">Active</a></li>
+            <li><a href="?filter=completed">Completed</a></li>
         </ul>
         <!--Hidden if no completed items are left ↓ -->
         ${count - activeCount === 0 ? "" : async_generator_html_default`<form method="post" action="?handler=clear-completed">
