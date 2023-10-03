@@ -47,7 +47,6 @@ self.addEventListener("activate", async (e: ExtendableEvent) => {
 // @ts-ignore
 async function getResponse(e: FetchEvent) {
     const url = new URL(e.request.url)
-    console.log(`Fetching '${url.pathname}'`)
     if (url.pathname === root + "/" && e.request.method === "GET") {
         const index = await getAll({ request: e.request, url })
         return streamResponse(index)

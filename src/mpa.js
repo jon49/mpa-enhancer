@@ -35,6 +35,14 @@ w.addEventListener('click', e => {
     lastClick = e.target
 })
 
+/**
+* @param {HTMLElement | undefined} el
+* @returns {number | undefined}
+* */
+function calculateY(el) {
+    return el?.getBoundingClientRect().top
+}
+
 w.addEventListener('unload', () => {
     let data = getData() || {}
     let persistedPages = new Set(data.__ || [])
@@ -50,28 +58,28 @@ w.addEventListener('unload', () => {
 
     let active = doc.activeElement
     let target = active === doc.body ? lastClick : active
+    let miss = getAttr(target?.closest('[mpa-miss]'), 'mpa-miss')
+    let name = target?.getAttribute('name')
     data[pageName] = {
-        elY: target?.getBoundingClientRect().top,
         y: w.scrollY,
-        active: {
-            id: target?.id,
-            miss: getAttr(target?.closest('[mpa-miss]'), 'mpa-miss'),
-            name: target?.getAttribute('name')
+        // active
+        a: {
+            // target
+            t: { y: calculateY(target), q: (target?.id && `#${target.id}`) || (name && `[name="${name}"]`) },
+            // miss
+            m: { y: calculateY(query(miss)), q: miss }
         }
     }
-    localStorage.pageLocations = JSON.stringify(data)
+    localStorage._mpa = JSON.stringify(data)
 })
 
 function load() {
     if (query('[autofocus]')) return
     let location = getData(getPageName())
     if (!location) return
-    let { y, elY, active: { id, name, miss } } = location
+    let { y, a: { t, m } } = location
 
-    let active =
-        doc.getElementById(id)
-        || query(`[name="${name}"]`)
-        || query(miss)
+    let active = (t.q && query(t.q)) || (m.q && query(m.q))
     if (!hasAttr(active, 'mpa-skip-focus')) {
         run('focus', active)
         run('select', active)
@@ -80,7 +88,13 @@ function load() {
     if (!hasAttr(doc.body, 'mpa-skip-scroll') && y) {
         if (active) {
             // Scroll to where element was before
-            w.scrollTo({ top: w.scrollY + active.getBoundingClientRect().top - elY })
+            w.scrollTo({
+                top:
+                    w.scrollY
+                    // @ts-ignore
+                    + calculateY(active)
+                    - (t.q && t.y || m.q && m.y || 0)
+            })
         } else {
             // Scroll to where page was before
             w.scrollTo({ top: y })
@@ -100,7 +114,7 @@ function run(method, el) {
 * @param {string} [name]
 */
 function getData(name) {
-    let data = localStorage.pageLocations
+    let data = localStorage._mpa
     data = data && JSON.parse(data)
     return name == null ? data : data && data[name]
 }
@@ -108,5 +122,4 @@ function getData(name) {
 load()
 
 })()
-
 

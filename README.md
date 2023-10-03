@@ -5,7 +5,7 @@ Minimalist JavaScript to make your MPA work that much better
 On reloading of a page will scroll back to where the user left off and focus on
 the last element they were looking at.
 
-At 1.1 kB of minified JavaScript.
+At 1.2 kB of minified JavaScript.
 
 [Example TODO MVC application.](https://jon49.github.io/mpa-enhancer/todo/)
 
@@ -60,13 +60,13 @@ like so:
 
 ## Change Log
 
-**2.2.2/3**
+**2.2.2/3/4**
 
 Improved scrolling location.
 
 **2.2.1**
 
-Fixed not working on Firefox and switched from even `beforeunload` to `unload`.
+Fixed not working on Firefox and switched from event `beforeunload` to `unload`.
 
 **2.2.0**
 
