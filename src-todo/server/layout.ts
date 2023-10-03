@@ -66,7 +66,7 @@ export function layout(todos: TodoView[], activeCount: number, count: number, en
             <ul id="todo-list" class="todo-list">${todos.map(todoView)}</ul>
         </section>
         <!-- This footer should be hidden by default and shown when there are todos -->
-        <footer id="footer" class="footer ${!count ? 'hidden' : ''}}">
+        <footer id="footer" mpa-miss="#footer" class="footer ${!count ? 'hidden' : ''}}">
             <span class="todo-count">
                 <strong>${"" + activeCount}</strong> item${activeCount === 1 ? '' : 's'} left
             </span>
@@ -78,7 +78,7 @@ export function layout(todos: TodoView[], activeCount: number, count: number, en
             <li><a id=link-completed href="?filter=completed">Completed</a></li>
         </ul>
         <!--Hidden if no completed items are left ↓ -->
-        $${ count - activeCount === 0
+        ${ count - activeCount === 0
             ? ''
         : html`<form method="post" action="?handler=clear-completed">
                 <button id="clear-completed" class="clear-completed">Clear completed</button>

@@ -79,7 +79,13 @@ function load() {
     if (!location) return
     let { y, a: { t, m } } = location
 
-    let active = (t.q && query(t.q)) || (m.q && query(m.q))
+    let active
+    let elY =
+        (t.q && (active = query(t.q)))
+            ?  t.y
+        : (m.q && (active = query(m.q)))
+            ?  m.y
+        : 0
     if (!hasAttr(active, 'mpa-skip-focus')) {
         run('focus', active)
         run('select', active)
@@ -93,7 +99,7 @@ function load() {
                     w.scrollY
                     // @ts-ignore
                     + calculateY(active)
-                    - (t.q && t.y || m.q && m.y || 0)
+                    - elY
             })
         } else {
             // Scroll to where page was before
@@ -122,5 +128,4 @@ function getData(name) {
 load()
 
 })()
-
 

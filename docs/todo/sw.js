@@ -158,7 +158,7 @@ function layout(todos, activeCount, count, enableJS) {
             <ul id="todo-list" class="todo-list">${todos.map(todoView)}</ul>
         </section>
         <!-- This footer should be hidden by default and shown when there are todos -->
-        <footer id="footer" class="footer ${!count ? "hidden" : ""}}">
+        <footer id="footer" mpa-miss="#footer" class="footer ${!count ? "hidden" : ""}}">
             <span class="todo-count">
                 <strong>${"" + activeCount}</strong> item${activeCount === 1 ? "" : "s"} left
             </span>
@@ -170,7 +170,7 @@ function layout(todos, activeCount, count, enableJS) {
             <li><a id=link-completed href="?filter=completed">Completed</a></li>
         </ul>
         <!--Hidden if no completed items are left ↓ -->
-        $${count - activeCount === 0 ? "" : async_generator_html_default`<form method="post" action="?handler=clear-completed">
+        ${count - activeCount === 0 ? "" : async_generator_html_default`<form method="post" action="?handler=clear-completed">
                 <button id="clear-completed" class="clear-completed">Clear completed</button>
             </form>`}
         </footer>

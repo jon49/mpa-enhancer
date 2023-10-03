@@ -14,6 +14,15 @@ At 1.2 kB of minified JavaScript.
 Install by downloading and linking to the script. You can use NPM too and copy
 it from there.
 
+### How it works
+
+It works first by looking for the `id` on the last focused element. If not
+present it will look for the `name` attribute. If both of those are missing you
+can use the `mpa-miss` (see below) to target a different element to determine
+the scroll location. If all those fail then it will scroll to the current
+scrolled position of the page — this is not ideal as you can be deleting and
+adding elements and this will make the scroll position slightly different.
+
 ### Attributes
 
 These attributes can enable the enhancer to make special accommodation to your
@@ -60,7 +69,7 @@ like so:
 
 ## Change Log
 
-**2.2.2/3/4**
+**2.2.2/3/4/6**
 
 Improved scrolling location.
 
