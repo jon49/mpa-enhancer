@@ -58,6 +58,10 @@ w.addEventListener('unload', () => {
 
     let active = doc.activeElement
     let target = active === doc.body ? lastClick : active
+    let mpaTarget = getAttr(target, 'mpa-target')
+    if (mpaTarget) {
+        target = query(mpaTarget)
+    }
     let miss = getAttr(target?.closest('[mpa-miss]'), 'mpa-miss')
     let name = target?.getAttribute('name')
     data[pageName] = {
@@ -128,4 +132,5 @@ function getData(name) {
 load()
 
 })()
+
 

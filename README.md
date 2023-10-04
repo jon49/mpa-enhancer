@@ -28,6 +28,16 @@ adding elements and this will make the scroll position slightly different.
 These attributes can enable the enhancer to make special accommodation to your
 pages.
 
+`mpa-target`: This will target a different element instead of the active
+element. This is useful when the active element is hidden and so the top value
+is 0.
+
+```html
+<div id="my-id">
+    <input mpa-target="#my-id" type=hidden name=whatever>
+</div>
+```
+
 `mpa-page-name`: This overrides the default page name (the pathname in your
 URL). Use it like so:
 
