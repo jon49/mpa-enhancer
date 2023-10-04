@@ -79,6 +79,10 @@ like so:
 
 ## Change Log
 
+**2.3.0**
+
+Added `mpa-target` attribute.
+
 **2.2.2/3/4/6**
 
 Improved scrolling location.
