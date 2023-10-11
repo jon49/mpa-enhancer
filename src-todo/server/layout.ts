@@ -78,9 +78,9 @@ export function layout(todos: TodoView[], activeCount: number, count: number, en
             <li><a href="?filter=completed">Completed</a></li>
         </ul>
         <!--Hidden if no completed items are left ↓ -->
-        ${ count - activeCount === 0
+        ${count - activeCount === 0
             ? ''
-        : html`<form method="post" action="?handler=clear-completed">
+            : html`<form method="post" action="?handler=clear-completed">
                 <button id="clear-completed" class="clear-completed">Clear completed</button>
             </form>`
         }
